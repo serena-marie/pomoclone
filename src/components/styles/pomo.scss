@@ -1,0 +1,27 @@
+.timerContainer {
+    background-color: rgb(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 20px 0px 30px;
+}
+.timerStringContainer {
+    display: block;
+    
+    p { 
+        font-size: 120px;
+        font-weight: bold;
+        margin-top: 20px;
+        font-family: Arial, Helvetica, sans-serif
+    }
+}
+.timerControls {
+
+    button {
+        border: none;
+        border-radius: 4px;
+        font-size: 22px;
+        height: 55px;
+        background-color: white;
+        color:  #ba4949;
+        margin-right: 10px
+    }
+}
