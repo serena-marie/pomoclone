@@ -4,7 +4,6 @@ export default function Home() {
     return(
         <>
             <div>
-                <h1>Home Page</h1>
                 <nav>
                     <ul>
                         {/* Link to allows us to update the URL without requesting another co from the server*/}
