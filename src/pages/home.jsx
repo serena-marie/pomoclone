@@ -1,4 +1,4 @@
-import {Outlet, Link} from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
 
 /**
  * @return {Component} Home components with navigation

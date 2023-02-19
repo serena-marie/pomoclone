@@ -1,0 +1,15 @@
+import { configureStore } from '@reduxjs/toolkit';
+import modeReducer from './components/modeSlice';
+
+export default configureStore({
+  reducer: {
+    mode: modeReducer,
+  },
+});
+
+/**
+ * The store brings together the state, actions, and reduces that make up your app.
+ * The store - holds current state via (store.getState())
+ * Allows the state to be updates via store.dispatch(action)
+ * "Registers listener callbacks via store.subscribe(listener)"
+*/

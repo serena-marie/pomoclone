@@ -1,7 +1,7 @@
 .timerContainer {
     background-color: rgb(255,255,255,0.1);
     border-radius: 6px;
-    padding: 60px;
+    padding: 10px 60px 10px 60px;
 }
 .timerStringContainer {    
     p { 
@@ -12,14 +12,36 @@
     }
 }
 .timerControls {
-
-    button {
+    .startPause {
+        display: inline-block;
+        vertical-align: middle;
         border: none;
         border-radius: 4px;
         font-size: 22px;
         height: 55px;
         background-color: white;
         color:  #ba4949;
-        margin: 10px
+        margin: 20px 0px 10px;
+        padding: 0px 12px;
+        width: 200px
     }
+
+    // fontawesome
+    svg {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 50px;
+        opacity: 0.9;
+    }
+}
+.modeButton {
+    background: none;
+    border: none;
+    color: white;
+    margin: 10px;
+}
+.activeMode {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    padding: 2px 12px;
 }
