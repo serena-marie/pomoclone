@@ -18,13 +18,14 @@ export default function Pomo() {
   function ModeButton({ mode, children }) {
     return (
       <button
-        className= {`modeButton ${mode.name === modeRedux ? 'activeMode': ''}`}
+        className= {`modeButton ${mode.name === modeRedux ? 'active': ''}`}
         onClick={() => dispatch(changeMode(mode))}
       >
         {children}
       </button>
     );
   }
+
   return (
     <div className='timerContainer'>
       <div className='modeButtons'>
@@ -32,7 +33,7 @@ export default function Pomo() {
         <ModeButton mode={MODES.SHORT_BREAK}>Short Break</ModeButton>
         <ModeButton mode={MODES.LONG_BREAK}>Long Break</ModeButton>
       </div>
-      <Timer timeTest={timeRedux} mode={modeRedux}/>
+      <Timer timeReceived={timeRedux} modeReceived={modeRedux}/>
     </div>
   );
 }

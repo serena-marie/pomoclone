@@ -9,27 +9,28 @@ import { TIMERCONTROLS } from '../../consts/timerControls';
  * Not sure if this is the way for documenting components but it's a start!
  * @return {Component} Pomodoro timer component
  */
-export function Timer({ timeTest, mode }) {
-  console.log(`Received mode: ${mode}, Received time ${timeTest}`);
-  const testTime = timeTest * 60;
+export function Timer({ timeReceived, modeReceived }) {
+  const timeSeconds = timeReceived * 60;
   const [timerActive, setTimerActive] = useState(false);
-  const [time, setTime] = useState(testTime);
+  const [time, setTime] = useState(timeSeconds);
   const [buttonState, setButtonState] = useState('START');
 
-  // // just for now, this will be set by settings
-  // const testTime = 60 * 60 // minutes * seconds
-  // const [time, setTime] = useState(testTime)
+  // Updates time when mode changes
+  useEffect(() => {
+    if (time !== timeSeconds && timerActive) reset();
+    else setTime(timeSeconds);
+  }, [modeReceived]);
+
+
   useEffect(() => {
     // https://developer.mozilla.org/en-US/docs/Web/API/setInterval
     // https://stackoverflow.com/questions/39426083/update-react-component-every-second
     let timeInterval = null;
-    if (timerActive) {
+    if (timerActive && time > 0) {
       timeInterval = setInterval(() => {
-        if (time > 0) setTime(time - 1);
+        setTime(time-1);
       }, 1000);
     }
-
-    // called when unmounted
     return () => {
       clearInterval(timeInterval);
     };
@@ -74,7 +75,7 @@ export function Timer({ timeTest, mode }) {
   * Resets time back to last set time
   */
   function reset() {
-    setTime(testTime);
+    setTime(timeSeconds);
     setTimerActive(false);
     setButtonState(TIMERCONTROLS.start);
   }
@@ -125,7 +126,6 @@ export function Timer({ timeTest, mode }) {
 }
 
 Timer.propTypes = {
-  timeTest: PropTypes.number,
-  mode: PropTypes.string,
-  modeChange: PropTypes.bool,
+  timeReceived: PropTypes.number,
+  modeReceived: PropTypes.string,
 };
