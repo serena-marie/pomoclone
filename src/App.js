@@ -1,6 +1,4 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from './store';
 import './App.scss';
 
 // Routes
@@ -9,6 +7,7 @@ import Pomo from './components/pomo';
 // import Break from './components/break';
 // import Reports from "./components/report"
 import ErrorPage from './components/errorPage';
+import { useSelector } from 'react-redux';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -36,14 +35,13 @@ const router = createBrowserRouter([
  * @return {Component} App component
  */
 function App() {
+  const modeRedux = useSelector((state) => state.mode.value);
   return (
-    <Provider store={store}>
-      <div className="App">
-        <header className="App-header">
-          <RouterProvider router = {router} />
-        </header>
-      </div>
-    </Provider>
+    <div className="App">
+      <header className={`App-header ${modeRedux}`}>
+        <RouterProvider router = {router} />
+      </header>
+    </div>
   );
 }
 
