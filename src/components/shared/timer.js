@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faForwardStep } from '@fortawesome/free-solid-svg-icons';
@@ -14,11 +15,15 @@ export function Timer({ timeReceived, modeReceived }) {
   const [timerActive, setTimerActive] = useState(false);
   const [time, setTime] = useState(timeSeconds);
   const [buttonState, setButtonState] = useState('START');
+  const [toggle, setToggle] = useState(true);
 
   // Updates time when mode changes
   useEffect(() => {
     if (time !== timeSeconds && timerActive) reset();
-    else setTime(timeSeconds);
+    else {
+      setTime(timeSeconds);
+      if (!toggle) setToggle(true);
+    }
   }, [modeReceived]);
 
 
@@ -30,6 +35,10 @@ export function Timer({ timeReceived, modeReceived }) {
       timeInterval = setInterval(() => {
         setTime(time-1);
       }, 1000);
+    }
+    if (time === 0) {
+      // alert('Time for a {break_type} break!')
+      // then change mode
     }
     return () => {
       clearInterval(timeInterval);
@@ -80,6 +89,22 @@ export function Timer({ timeReceived, modeReceived }) {
     setButtonState(TIMERCONTROLS.start);
   }
 
+  function toggleTimeEdit() {
+    setToggle(false);
+  }
+
+  function handleChange(event) {
+    if (event.key === 'Enter') {
+      if (event.target.value % 1 == 0 && event.target.value > 0) {
+        setTime(event.target.value * 60);
+        setToggle(true);
+      } else {
+        console.log('Unexpected value. Please enter minutes as whole & positive number.');
+        setToggle(true);
+      }
+    }
+  }
+
   /**
   * Controls timer
   * @param {String} state
@@ -101,25 +126,36 @@ export function Timer({ timeReceived, modeReceived }) {
   return (
     <div>
       <div className='timerStringContainer'>
-        <p> {formatTime(time)} </p>
-        <div className='timerControls'>
-          <button className='startPause' onClick={() => timerControl(buttonState)}> { buttonState } </button>
-          <FontAwesomeIcon icon={faForwardStep} onClick={() => reset()}/>
-          <button onClick={() => reset()}> { TIMERCONTROLS.reset }</button>
+        {
+          toggle ? (
+            <div>
+              <p onDoubleClick={toggleTimeEdit}> {formatTime(time)} </p>
+              <div className='timerControls'>
+                <button className='startPause' onClick={() => timerControl(buttonState)}> { buttonState } </button>
+                <FontAwesomeIcon icon={faForwardStep} onClick={() => reset()}/>
+                <button onClick={() => reset()}> { TIMERCONTROLS.reset }</button>
 
-          {/** Only list Add / Subtract controls when timer is active */}
-          {
-            timerActive &&
-                      <div className='timerManipulate'>
-                        <button onClick={() => modifyActiveTimer(5, TIMERCONTROLS.add)}>
-                          { TIMERCONTROLS.add }
-                        </button>
-                        <button onClick={() => modifyActiveTimer(1, TIMERCONTROLS.subtract)}>
-                          { TIMERCONTROLS.subtract }
-                        </button>
-                      </div>
-          }
-        </div>
+                {/** Only list Add / Subtract controls when timer is active */}
+                {
+                  timerActive &&
+                            <div className='timerManipulate'>
+                              <button onClick={() => modifyActiveTimer(5, TIMERCONTROLS.add)}>
+                                { TIMERCONTROLS.add }
+                              </button>
+                              <button onClick={() => modifyActiveTimer(1, TIMERCONTROLS.subtract)}>
+                                { TIMERCONTROLS.subtract }
+                              </button>
+                            </div>
+                }
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className='warning'>Please enter in minutes. Whole & positive numbers only. Press enter to submit.</p>
+              <input type="number" defaultValue={timeReceived} onKeyDown={handleChange} />
+            </div>
+          )
+        }
       </div>
     </div>
   );

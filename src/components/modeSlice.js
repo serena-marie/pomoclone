@@ -6,6 +6,7 @@ export const modeSlice = createSlice({
   initialState: {
     value: MODES.POMODORO.name,
     time: 60,
+    rounds: 4,
   },
   reducers: {
     changeMode: (state, action) => {
