@@ -1,22 +1,22 @@
-// const MODES = Object.freeze({
-//   POMODORO: 'pomodoro',
-//   SHORT_BREAK: 'shortBreak',
-//   LONG_BREAK: 'longBreak',
-// });
+// Ideally would have this set up in a config to centrally disable/enable
+// Will set up later
+const isTesting = true;
+const testingValues = 1;
 
-const MODES = Object.freeze({
+export const MODES = Object.freeze({
   POMODORO: {
     name: 'pomodoro',
-    time: 60,
+    time: isTesting ? testingValues : 60,
+    message: 'Time to focus!',
   },
-  SHORT_BREAK: {
+  SHORTBREAK: {
     name: 'shortBreak',
-    time: 10,
+    time: isTesting ? testingValues : 10,
+    message: 'Time for a break!',
   },
-  LONG_BREAK: {
+  LONGBREAK: {
     name: 'longBreak',
-    time: 30,
+    time: isTesting ? testingValues : 30,
+    message: 'Time for an extended break!',
   },
 });
-
-export { MODES };

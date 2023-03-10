@@ -1,39 +1,28 @@
-/* eslint-disable max-len */
-/* eslint-disable react/prop-types */
-/* eslint-disable require-jsdoc */
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { MODES } from '../consts/modes';
-import { changeMode } from './modeSlice';
 import { Timer } from './shared/timer';
+import { modeHelper } from './shared/helper';
+import ModeButton from './ModeButton';
 import './styles/pomo.scss';
 
-/**
- * Not sure if this is the way for documenting components but it's a start!
- * @return {Component} Pomodoro timer component
- */
+// eslint-disable-next-line require-jsdoc
 export default function Pomo() {
   const modeRedux = useSelector((state) => state.mode.value);
   const timeRedux = useSelector((state) => state.mode.time);
-  const dispatch = useDispatch();
-  function ModeButton({ mode, children }) {
-    return (
-      <button
-        className= {`modeButton ${mode.name === modeRedux ? 'active': ''}`}
-        onClick={() => dispatch(changeMode(mode))}
-      >
-        {children}
-      </button>
-    );
-  }
+  const currentRoundRedux = useSelector((state) => state.mode.currentRound);
 
   return (
-    <div className='timerContainer'>
-      <div className='modeButtons'>
-        <ModeButton mode={MODES.POMODORO}>Pomodoro</ModeButton>
-        <ModeButton mode={MODES.SHORT_BREAK}>Short Break</ModeButton>
-        <ModeButton mode={MODES.LONG_BREAK}>Long Break</ModeButton>
+    <>
+      <div className='timerContainer'>
+        <div className='modeButtons'>
+          <ModeButton mode={MODES.POMODORO}>Pomodoro</ModeButton>
+          <ModeButton mode={MODES.SHORTBREAK}>Short Break</ModeButton>
+          <ModeButton mode={MODES.LONGBREAK}>Long Break</ModeButton>
+        </div>
+        <Timer timeReceived={timeRedux} modeReceived={modeRedux}/>
       </div>
-      <Timer timeReceived={timeRedux} modeReceived={modeRedux}/>
-    </div>
+      <div className='pomoCount'>#{ currentRoundRedux }</div>
+      <div className='pomoMessage'>{ modeHelper(modeRedux)?.message }</div>
+    </>
   );
 }

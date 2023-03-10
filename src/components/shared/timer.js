@@ -1,21 +1,30 @@
-/* eslint-disable require-jsdoc */
+import '../styles/pomo.scss';
+import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faForwardStep } from '@fortawesome/free-solid-svg-icons';
-import PropTypes from 'prop-types';
-import '../styles/pomo.scss';
 import { TIMERCONTROLS } from '../../consts/timerControls';
+import { MODES } from '../../consts/modes';
+import { useSelector, useDispatch } from 'react-redux';
+import { changeMode, updateCurrentRound } from '../modeSlice';
+import { updateTitle } from './updateTitle';
 
-/**
- * Not sure if this is the way for documenting components but it's a start!
- * @return {Component} Pomodoro timer component
- */
+// eslint-disable-next-line require-jsdoc
 export function Timer({ timeReceived, modeReceived }) {
   const timeSeconds = timeReceived * 60;
   const [timerActive, setTimerActive] = useState(false);
   const [time, setTime] = useState(timeSeconds);
   const [buttonState, setButtonState] = useState('START');
   const [toggle, setToggle] = useState(true);
+  const [currentRound, setCurrentRound] = useState(1);
+  const maxRounds = useSelector((state) => state.mode.rounds);
+
+  const dispatch = useDispatch();
+
+  // update page title
+  useEffect(() => {
+    updateTitle(formatTime(time), modeReceived);
+  }, [time]);
 
   // Updates time when mode changes
   useEffect(() => {
@@ -26,24 +35,52 @@ export function Timer({ timeReceived, modeReceived }) {
     }
   }, [modeReceived]);
 
-
   useEffect(() => {
     // https://developer.mozilla.org/en-US/docs/Web/API/setInterval
     // https://stackoverflow.com/questions/39426083/update-react-component-every-second
     let timeInterval = null;
-    if (timerActive && time > 0) {
+    if (timerActive) {
       timeInterval = setInterval(() => {
-        setTime(time-1);
+        setTime((prevTime) => {
+          return prevTime > 0 ? prevTime - 1 : 0;
+        });
       }, 1000);
-    }
-    if (time === 0) {
-      // alert('Time for a {break_type} break!')
-      // then change mode
     }
     return () => {
       clearInterval(timeInterval);
     };
-  }, [timerActive, time]);
+  }, [timerActive]);
+
+  useEffect(() => {
+    if (time === 0) {
+      const nextMode = getNextMode(modeReceived, currentRound);
+      dispatch(changeMode(nextMode));
+    }
+  }, [time]);
+
+  // Why does initial state show nextMode as longBreak (but then switches to shortbreak)
+  // - actually not just initial; nearly showing nextMode as longBreak but then properly switches
+  useEffect(() => {
+    const nextMode = getNextMode(modeReceived);
+    console.log(`modeReceived ${modeReceived} nextMode ${JSON.stringify(nextMode)} time ${time}`);
+    if (nextMode === MODES.POMODORO && time === 0) {
+      const updatedRound = currentRound + 1;
+      dispatch(updateCurrentRound(updatedRound));
+      setCurrentRound(updatedRound);
+    }
+  }, [time]);
+
+  /**
+   * Gets the upcoming mode based on the current mode and pomodoro round number.
+   * @param {String} mode Current mode's name
+   * @param {Number} round Current round's number
+   * @return {String} The name of the next round
+   */
+  function getNextMode(mode, round) {
+    if (mode === MODES.POMODORO.name && round < maxRounds) return MODES.SHORTBREAK;
+    if (mode === MODES.SHORTBREAK.name || mode === MODES.LONGBREAK.name) return MODES.POMODORO;
+    return MODES.LONGBREAK;
+  }
 
   /**
   * Formats time to be displayed
@@ -89,10 +126,17 @@ export function Timer({ timeReceived, modeReceived }) {
     setButtonState(TIMERCONTROLS.start);
   }
 
+  /**
+   * Toggles time edit to false
+   */
   function toggleTimeEdit() {
     setToggle(false);
   }
 
+  /**
+   * Updates time to user entered valued on Enter.
+   * @param {Event} event
+   */
   function handleChange(event) {
     if (event.key === 'Enter') {
       if (event.target.value % 1 == 0 && event.target.value > 0) {

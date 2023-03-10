@@ -5,8 +5,9 @@ export const modeSlice = createSlice({
   name: 'mode',
   initialState: {
     value: MODES.POMODORO.name,
-    time: 60,
+    time: 1,
     rounds: 4,
+    currentRound: 1,
   },
   reducers: {
     changeMode: (state, action) => {
@@ -21,38 +22,15 @@ export const modeSlice = createSlice({
     changeTime: (state, action) => {
       state.time = action.payload;
     },
+    timerUpdate: (state, action) => {
+      state.timeLeft = action.payload;
+    },
+    updateCurrentRound: (state, action) => {
+      state.currentRound = action.payload;
+    },
   },
 });
 
-export const { changeMode, changeTime } = modeSlice.actions;
+export const { changeMode, updateCurrentRound } = modeSlice.actions;
 
 export default modeSlice.reducer;
-
-// if (Object.entries(TEST).find()})) {
-//   console.log(`Yep`);
-// } else {
-//   console.log(`Nope`);
-// }
-// Works but is there something better
-// console.log(JSON.stringify(`payload is ${action.payload}`));
-// if (Object.entries(TEST).filter(([key, value]) => {
-//   value?.name.includes(action.payload);
-// }).length > 0) {
-//   console.log('yelo');
-// } else {
-//   console.log('nope');
-// }
-// },
-//   if (Object.entries(TEST).filter(([key, value]) => value?.name.includes(action.payload))) {
-//     state.value = action.payload;
-//   } else {
-//     console.log(`Hrrrrrm. Did not receive an expected Mode. Received: ${action.payload}`);
-//   }
-// },
-// changeMode: (state, action) => {
-//   if (Object.values(MODES).includes(action.payload)) {
-//     state.value = action.payload;
-//   } else {
-//     console.log(`Hrrrrrm. Did not receive an expected Mode. Received: ${action.payload}`);
-//   }
-// },
