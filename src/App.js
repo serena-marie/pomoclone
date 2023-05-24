@@ -35,7 +35,7 @@ const router = createBrowserRouter([
  * @return {Component} App component
  */
 function App() {
-  const modeRedux = useSelector((state) => state.mode.value);
+  const modeRedux = useSelector((state) => state.mode.currentMode);
   return (
     <div className="App">
       <header className={`App-header ${modeRedux}`}>

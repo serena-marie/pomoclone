@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faForwardStep } from '@fortawesome/free-solid-svg-icons';
 import { TIMERCONTROLS } from '../../consts/timerControls';
-import { MODES } from '../../consts/modes';
+import { MODES, POMODORO, LONGBREAK, SHORTBREAK } from '../../consts/modes';
 import { useSelector, useDispatch } from 'react-redux';
-import { changeMode, updateCurrentRound } from '../modeSlice';
+import { changeCurrentMode, updateCurrentRound, updateTimeSettings, resetUserSettings } from '../modeSlice';
 import { updateTitle } from './updateTitle';
-
 // eslint-disable-next-line require-jsdoc
 export function Timer({ timeReceived, modeReceived }) {
   const timeSeconds = timeReceived * 60;
@@ -18,7 +17,7 @@ export function Timer({ timeReceived, modeReceived }) {
   const [toggle, setToggle] = useState(true);
   const [currentRound, setCurrentRound] = useState(1);
   const maxRounds = useSelector((state) => state.mode.rounds);
-
+  const [isResetting, setIsResetting] = useState(false);
   const dispatch = useDispatch();
 
   // update page title
@@ -31,6 +30,7 @@ export function Timer({ timeReceived, modeReceived }) {
     if (time !== timeSeconds && timerActive) reset();
     else {
       setTime(timeSeconds);
+      // if trying to edit time when switching modes, toggle off.
       if (!toggle) setToggle(true);
     }
   }, [modeReceived]);
@@ -52,21 +52,18 @@ export function Timer({ timeReceived, modeReceived }) {
   }, [timerActive]);
 
   useEffect(() => {
-    if (time === 0) {
-      const nextMode = getNextMode(modeReceived, currentRound);
-      dispatch(changeMode(nextMode));
-    }
-  }, [time]);
-
-  // Why does initial state show nextMode as longBreak (but then switches to shortbreak)
-  // - actually not just initial; nearly showing nextMode as longBreak but then properly switches
-  useEffect(() => {
-    const nextMode = getNextMode(modeReceived);
-    console.log(`modeReceived ${modeReceived} nextMode ${JSON.stringify(nextMode)} time ${time}`);
+    const nextMode = getNextMode(modeReceived, currentRound);
     if (nextMode === MODES.POMODORO && time === 0) {
       const updatedRound = currentRound + 1;
       dispatch(updateCurrentRound(updatedRound));
       setCurrentRound(updatedRound);
+    }
+  }, [time]);
+
+  useEffect(() => {
+    if (time === 0) {
+      const nextMode = getNextMode(modeReceived, currentRound);
+      dispatch(changeCurrentMode(nextMode));
     }
   }, [time]);
 
@@ -77,9 +74,9 @@ export function Timer({ timeReceived, modeReceived }) {
    * @return {String} The name of the next round
    */
   function getNextMode(mode, round) {
-    if (mode === MODES.POMODORO.name && round < maxRounds) return MODES.SHORTBREAK;
-    if (mode === MODES.SHORTBREAK.name || mode === MODES.LONGBREAK.name) return MODES.POMODORO;
-    return MODES.LONGBREAK;
+    if (mode === MODES[POMODORO].name && round < maxRounds) return MODES[SHORTBREAK]?.name;
+    if (mode === MODES[SHORTBREAK].name || mode === MODES[LONGBREAK].name) return MODES[POMODORO]?.name;
+    return MODES[LONGBREAK]?.name;
   }
 
   /**
@@ -117,14 +114,37 @@ export function Timer({ timeReceived, modeReceived }) {
     }
   }
 
+  // necessary to use this useEffect and state because dispatched actions are only avail on the next render
+  useEffect(() => {
+    if (isResetting) {
+      reset();
+      setIsResetting(false);
+    }
+  }, [isResetting]);
+
   /**
   * Resets time back to last set time
+  * Note to self - send in timeSeconds in most cases
   */
   function reset() {
     setTime(timeSeconds);
     setTimerActive(false);
     setButtonState(TIMERCONTROLS.start);
   }
+
+  /**
+   * Resets ALL settings back to app default
+   * This doesn't quite work as expected because reset is called before dispatch finishes.
+   */
+  function resetSettings() {
+    // dispatch(handleReset()).then(() => {
+    //   console.log(`Now calling reset...`);
+    //   reset();
+    // });
+    dispatch(resetUserSettings({ mode: modeReceived }));
+    setIsResetting(true);
+  }
+
 
   /**
    * Toggles time edit to false
@@ -140,6 +160,13 @@ export function Timer({ timeReceived, modeReceived }) {
   function handleChange(event) {
     if (event.key === 'Enter') {
       if (event.target.value % 1 == 0 && event.target.value > 0) {
+        console.log(`modeReceived`, modeReceived);
+        // eslint-disable-next-line no-unused-vars
+        const state = {
+          mode: modeReceived,
+          time: parseInt(event.target.value),
+        };
+        dispatch(updateTimeSettings(state));
         setTime(event.target.value * 60);
         setToggle(true);
       } else {
@@ -167,6 +194,7 @@ export function Timer({ timeReceived, modeReceived }) {
         console.log(`Hrmmmm, how peculiar. An error occurred.`);
     }
   }
+
   return (
     <div>
       <div className='timerStringContainer'>
@@ -178,7 +206,7 @@ export function Timer({ timeReceived, modeReceived }) {
                 <button className='startPause' onClick={() => timerControl(buttonState)}> { buttonState } </button>
                 <FontAwesomeIcon icon={faForwardStep} onClick={() => reset()}/>
                 <button onClick={() => reset()}> { TIMERCONTROLS.reset }</button>
-
+                <button onClick={() => resetSettings()}>Restore Setting to default</button>
                 {/** Only list Add / Subtract controls when timer is active */}
                 {
                   timerActive &&
@@ -195,7 +223,10 @@ export function Timer({ timeReceived, modeReceived }) {
             </div>
           ) : (
             <div>
-              <p className='warning'>Please enter in minutes. Whole & positive numbers only. Press enter to submit.</p>
+              <p className='warning'>
+                {`Editing time settings for ${modeReceived}`} <br/>
+                {`Please enter in minutes. Whole & positive numbers only. Press enter to submit.`}
+              </p>
               <input type="number" defaultValue={timeReceived} onKeyDown={handleChange} />
             </div>
           )

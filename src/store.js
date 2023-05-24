@@ -1,10 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
 import modeReducer from './components/modeSlice';
+import { loadState, saveState } from './cache';
 
-export default configureStore({
+const persistedState = loadState();
+
+const store = configureStore({
+  preloadedState: persistedState,
   reducer: {
     mode: modeReducer,
   },
+});
+
+store.subscribe(() => {
+  saveState(store.getState());
 });
 
 /**
@@ -13,3 +21,4 @@ export default configureStore({
  * Allows the state to be updates via store.dispatch(action)
  * "Registers listener callbacks via store.subscribe(listener)"
 */
+export default store;
