@@ -1,0 +1,66 @@
+@import './variables.scss';
+.timerContainer {
+    background-color: rgb(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 10px 60px 10px 60px;
+}
+.timerStringContainer {
+    .warning {
+        font-size: 12px;
+        font-style: italic;
+        font-weight: lighter;
+    }    
+    p { 
+        font-size: 120px;
+        margin: 0px;
+        font-weight: bold;
+        font-family: Arial, Helvetica, sans-serif
+    }
+}
+.timerControls {
+    .startPause {
+        display: inline-block;
+        vertical-align: middle;
+        border: none;
+        border-radius: 4px;
+        font-size: 22px;
+        height: 55px;
+        background-color: white;
+        color:  $pomo-background;
+        margin: 20px 0px 10px;
+        padding: 0px 12px;
+        width: 200px
+    }
+
+    // fontawesome
+    svg {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 50px;
+        opacity: 0.9;
+    }
+}
+.modeButton {
+    background: none;
+    border: none;
+    color: white;
+    margin: 10px;
+
+    &.active {
+        background-color: rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+        padding: 2px 12px;
+    }
+}
+.pomoCount {
+    display: inline-block;
+    font-size: 16px;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+.pomoMessage {
+    font-size: 18px;
+    font-weight: 100;
+    color: white;
+    overflow-wrap: break-word;
+}
