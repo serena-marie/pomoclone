@@ -1,32 +1,15 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import './App.scss';
+import './styles/App.scss';
 
 // Routes
-// import Home from './pages/home';
-import Pomo from './components/pomo';
-// import Break from './components/break';
-// import Reports from "./components/report"
-import ErrorPage from './components/errorPage';
+import Pomo from './pages/pomo';
+import ErrorPage from './pages/errorPage';
 import { useSelector } from 'react-redux';
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Pomo />,
     errorElement: <ErrorPage />,
-    // children: [
-    //   {
-    //     path: '/',
-    //     element: <Pomo />,
-    //   },
-    //   // {
-    //   //   path: '/break',
-    //   //   element: <Break />,
-    //   // },
-    //   // {
-    //   //   path: "/reporting",
-    //   //   element: <Reports />
-    //   // },
-    // ],
   },
 
 ]);

@@ -125,3 +125,6 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Reference files - should be removed all together when done
+./src/reference/*

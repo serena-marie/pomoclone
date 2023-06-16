@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
-import { changeCurrentMode } from './modeSlice';
+import { changeCurrentMode } from '../../store/modeSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { modeType } from './types';
+import { modeType } from '../types';
 
 /**
    * @param {Object} mode MODE object, name of the button being used

@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import modeReducer from './components/modeSlice';
+import modeReducer from './modeSlice';
 import { loadState, saveState } from './cache';
 
 const persistedState = loadState();
