@@ -1,6 +1,6 @@
 // Ideally would have this set up in a config to centrally disable/enable
 // Will set up later
-const isTesting = true;
+const isTesting = false;
 const testingValues = 1;
 
 const POMODORO = 'pomodoro';
