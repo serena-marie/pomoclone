@@ -4,14 +4,20 @@ import './styles/App.scss';
 // Routes
 import Pomo from './pages/pomo';
 import ErrorPage from './pages/errorPage';
+import Overview from './pages/overview';
 import { useSelector } from 'react-redux';
+
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Pomo />,
-    errorElement: <ErrorPage />,
+    errorElement: <ErrorPage/>,
   },
-
+  {
+    path: '/stats',
+    element: <Overview />,
+    errorElement: <ErrorPage/>,
+  },
 ]);
 /**
  *
