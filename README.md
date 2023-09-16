@@ -4,6 +4,7 @@
 Reverse engineering pomofocus.io, plans to add in some additional features I'd like to see such as a calendar breakdown of the pomos and easily adding / subtracting time from an active timer.
 
 ## To Be Implemented
+- [ ] Update spacing between Stats icons and Stats text
 - [ ] Reporting display as Calendar view which highlights breaks & pomo windows
   - [ ] Record data / time 
   - [ ] Implement calendar view

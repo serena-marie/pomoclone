@@ -24,7 +24,6 @@ export default function Modal({setIsModalOpen}) {
   return (
     <div className="modalContainer">
       <div className="modal" ref={contentRef}>
-        <h1> Hello from Modal </h1>
         <StatsOverview/>
       </div>
     </div>
