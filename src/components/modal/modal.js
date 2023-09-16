@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
-import '../styles/modal.scss';
-import StatsOverview from './stats';
+import '../../styles/modal.scss';
+import StatsOverview from '../stats/StatsOverview';
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 

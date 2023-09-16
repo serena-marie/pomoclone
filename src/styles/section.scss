@@ -1,0 +1,23 @@
+.sectionContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-top: 14px;
+  flex: 0;
+}
+.sectionDivider {
+  height: 1px;
+  width: 100%;
+  background-color: rgb(240, 240, 240);
+  position: absolute;
+  left: 0px;
+}
+.sectionHeader {
+  background-color: white;
+  z-index:1;
+  color: rgb(87,87,87);
+  font-size: 18px;
+  font-weight: bold;
+  text-align: left;
+  padding-right: 12px;
+}

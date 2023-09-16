@@ -5,7 +5,7 @@ import { faChartColumn } from '@fortawesome/free-solid-svg-icons';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import '../styles/header.scss';
-import { useModalContext } from './ModalContext';
+import { useModalContext } from './modal/ModalContext';
 
 export function Header() {
   const { setIsModalOpen } = useModalContext();

@@ -3,8 +3,8 @@ import { Timer } from '../components/timer/timer';
 import ModesButton from '../components/modeButtons/ModesButtons';
 import '../styles/pomo.scss';
 import PomoStatus from '../components/pomoStatus/PomoStatus';
-import Modal from '../components/modal';
-import { useModalContext } from '../components/ModalContext';
+import Modal from '../components/modal/modal';
+import { useModalContext } from '../components/modal/ModalContext';
 
 // eslint-disable-next-line require-jsdoc
 export default function Pomo() {
