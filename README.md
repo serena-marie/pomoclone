@@ -1,13 +1,19 @@
 # pomoclone
 ***work in progress***
 
-Reverse engineering pomofocus.io, plans to add in some additional features I'd like to see such as a calendar breakdown of the pomos and easily adding / subtracting time from an active timer.
+Creating a pomodoro timer, inspired by pomofocus.io, plans to add in some additional features I'd like to see such as a calendar breakdown of the pomos and easily adding / subtracting time from an active timer.
 
 ## To Be Implemented
 - [ ] Update spacing between Stats icons and Stats text
+- [ ] Add 'X' to modal
+- [ ] Get Calendar view smaller (cells? small but still useable )
+- [ ] Stats themeing should match mode
 - [ ] Reporting display as Calendar view which highlights breaks & pomo windows
   - [ ] Record data / time 
-  - [ ] Implement calendar view
+  - [x] Implement calendar view
+  - [ ] Data summary (#hours in each)
+- [ ] Settings modal
+- [ ] Login
 - [ ] Timer redesigns ; had some thoughts need to draft up
 - [ ] Audio
 - [x] Add / Subtract focus time - should be able to be changed while the timer is going
