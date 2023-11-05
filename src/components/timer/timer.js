@@ -1,16 +1,17 @@
-/* eslint-disable no-unused-vars */
 import '../../styles/pomo.scss';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { TIMERCONTROLS } from '../../consts/timerControls';
 import { MODES, POMODORO, LONGBREAK, SHORTBREAK } from '../../consts/modes';
+import { MILLISECONDS_PER_MINUTE } from '../../consts/timeMaths';
 import { useSelector, useDispatch } from 'react-redux';
-import { changeCurrentMode, updateCurrentRound, updateTimeSettings, resetUserSettings } from '../../store/modeSlice';
-import { updateTitle } from '../../utils/updateTitle';
+import { updateTimeSettings, resetUserSettings } from '../../store/modeSlice';
+import * as Hooks from './hooks';
 import TimerDisplay from './TimerDisplay';
-import formatTime from '../../utils/formatTime';
 import TimerControls from './TimerControls';
 import TimerSettingsEditor from './TimerSettings';
+import { db } from '../../database/db';
+
 // eslint-disable-next-line require-jsdoc
 export function Timer({ timeReceived, modeReceived }) {
   const timeSeconds = timeReceived * 60;
@@ -21,54 +22,35 @@ export function Timer({ timeReceived, modeReceived }) {
   const [currentRound, setCurrentRound] = useState(1);
   const maxRounds = useSelector((state) => state.mode.rounds);
   const [isResetting, setIsResetting] = useState(false);
+  const [currentStartTime, setCurrentStartTime] = useState(null);
   const dispatch = useDispatch();
 
-  // update page title
-  useEffect(() => {
-    updateTitle(formatTime(time), modeReceived);
-  }, [time]);
+  // CUSTOM HOOKS; see timer/hooks.js
+  Hooks.updatePageTitle(time, modeReceived);
+  Hooks.syncTimeOnModeSwitch(time, timeSeconds, timerActive, modeReceived, toggle, reset, setToggle, setTime);
+  Hooks.addLogToIndexedDb(time, modeReceived, addDatabaseLog);
+  Hooks.timerCountdown(timerActive, setTime);
+  Hooks.updateRoundCount(time, currentRound, modeReceived, setCurrentRound, getNextMode, dispatch);
+  Hooks.updateMode(time, modeReceived, currentRound, getNextMode, dispatch);
 
-  // Updates time when mode changes
-  useEffect(() => {
-    if (time !== timeSeconds && timerActive) reset();
-    else {
-      setTime(timeSeconds);
-      // if trying to edit time when switching modes, toggle off.
-      if (!toggle) setToggle(true);
-    }
-  }, [modeReceived]);
-
-  useEffect(() => {
-    // https://developer.mozilla.org/en-US/docs/Web/API/setInterval
-    // https://stackoverflow.com/questions/39426083/update-react-component-every-second
-    let timeInterval = null;
-    if (timerActive) {
-      timeInterval = setInterval(() => {
-        setTime((prevTime) => {
-          return prevTime > 0 ? prevTime - 1 : 0;
-        });
-      }, 1000);
-    }
-    return () => {
-      clearInterval(timeInterval);
-    };
-  }, [timerActive]);
-
-  useEffect(() => {
-    const nextMode = getNextMode(modeReceived, currentRound);
-    if (nextMode === MODES.POMODORO && time === 0) {
-      const updatedRound = currentRound + 1;
-      dispatch(updateCurrentRound(updatedRound));
-      setCurrentRound(updatedRound);
-    }
-  }, [time]);
-
-  useEffect(() => {
-    if (time === 0) {
-      const nextMode = getNextMode(modeReceived, currentRound);
-      dispatch(changeCurrentMode(nextMode));
-    }
-  }, [time]);
+  /**
+   * Adds logging for current pomo block, tracking pomo type, startTime, endTime, and totalDuration.
+   * Once logged, updates the currentTime to null
+   * @param {string} modeType
+   */
+  function addDatabaseLog(modeType) {
+    console.log('Now logging...');
+    const currentEndTime = new Date().toISOString();
+    db.pomodoroLogs.add({
+      mode: modeType,
+      startTime: currentStartTime,
+      endTime: currentEndTime,
+      totalDuration: (new Date(currentEndTime) - new Date(currentStartTime)) / MILLISECONDS_PER_MINUTE,
+    }).catch((error) => {
+      console.error('Failed to log this stint :( Error: ' + error);
+    });
+    setCurrentStartTime(null);
+  }
 
   /**
    * Gets the upcoming mode based on the current mode and pomodoro round number.
@@ -107,10 +89,12 @@ export function Timer({ timeReceived, modeReceived }) {
   function timerControl(state) {
     switch (state) {
       case TIMERCONTROLS.start:
+        setCurrentStartTime(new Date().toISOString());
         setTimerActive(true);
         setButtonState(TIMERCONTROLS.pause);
         break;
       case TIMERCONTROLS.pause:
+        addDatabaseLog(modeReceived);
         setTimerActive(false);
         setButtonState(TIMERCONTROLS.start);
         break;
@@ -172,27 +156,35 @@ export function Timer({ timeReceived, modeReceived }) {
   };
 
   return (
-    <div>
-      <div className='timerStringContainer'>
-        {
-          toggle ? (
-            <div>
-              <TimerDisplay time={time} onDoubleClick={toggleTimeEdit}/>
-              <TimerControls timerActive={timerActive} buttonState={buttonState} onReset={reset}
-                onTimerControl={timerControl} onResetSettings={resetSettings}
-                onModifyActiveTimer={modifyActiveTimer}/>
-            </div>
-          ) : (
-            <div>
-              <TimerSettingsEditor timeReceived={timeReceived} modeReceived={modeReceived}
-                onTimeSettingsChange={updateTimeSettings} onToggle={updateToggleState} updateTime={updateTime}/>
-              <p>{(() => {
-                console.log(`timeReceived ${timeReceived}`);
-              })()}</p>
-            </div>
-          )
-        }
-      </div>
+    <div className="timerStringContainer">
+      {toggle ? (
+        <div className="timerControlsContainer">
+          <TimerDisplay time={time} onDoubleClick={toggleTimeEdit} />
+          <TimerControls
+            timerActive={timerActive}
+            buttonState={buttonState}
+            onReset={reset}
+            onTimerControl={timerControl}
+            onResetSettings={resetSettings}
+            onModifyActiveTimer={modifyActiveTimer}
+          />
+        </div>
+      ) : (
+        <div className="timerSettingsEditorContainer">
+          <TimerSettingsEditor
+            timeReceived={timeReceived}
+            modeReceived={modeReceived}
+            onTimeSettingsChange={updateTimeSettings}
+            onToggle={updateToggleState}
+            updateTime={updateTime}
+          />
+          <p>
+            {(() => {
+              console.log(`timeReceived ${timeReceived}`);
+            })()}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
