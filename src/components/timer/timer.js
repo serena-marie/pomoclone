@@ -1,54 +1,54 @@
 import '../../styles/pomo.scss';
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TIMERCONTROLS } from '../../consts/timerControls';
 import { MODES, POMODORO, LONGBREAK, SHORTBREAK } from '../../consts/modes';
-import { MILLISECONDS_PER_MINUTE } from '../../consts/timeMaths';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateTimeSettings, resetUserSettings } from '../../store/modeSlice';
-import * as Hooks from './hooks';
+import { updateTimeSettings, resetUserSettings, updateTimerActive } from '../../store/modeSlice';
+import { addToDatabase } from '../../database/db';
+import PropTypes from 'prop-types';
 import TimerDisplay from './TimerDisplay';
 import TimerControls from './TimerControls';
 import TimerSettingsEditor from './TimerSettings';
-import { db } from '../../database/db';
+import * as Hooks from './hooks';
 
-// eslint-disable-next-line require-jsdoc
+/**
+ * Displays Timer and handles timer functions
+ * @param {number} timeReceived the time received, in minutes
+ * @param {string} modeReceived the current timer mode ["pomodoro", "shortBreak", "longBreak"]
+ * @return {JSX.Element}
+ */
 export function Timer({ timeReceived, modeReceived }) {
   const timeSeconds = timeReceived * 60;
-  const [timerActive, setTimerActive] = useState(false);
   const [time, setTime] = useState(timeSeconds);
   const [buttonState, setButtonState] = useState('START');
   const [toggle, setToggle] = useState(true);
   const [currentRound, setCurrentRound] = useState(1);
-  const maxRounds = useSelector((state) => state.mode.rounds);
   const [isResetting, setIsResetting] = useState(false);
   const [currentStartTime, setCurrentStartTime] = useState(null);
+  const maxRounds = useSelector((state) => state.mode.rounds);
+  const timerActive = useSelector((state) => state.mode.timerActive);
+
   const dispatch = useDispatch();
 
   // CUSTOM HOOKS; see timer/hooks.js
-  Hooks.updatePageTitle(time, modeReceived);
-  Hooks.syncTimeOnModeSwitch(time, timeSeconds, timerActive, modeReceived, toggle, reset, setToggle, setTime);
-  Hooks.addLogToIndexedDb(time, modeReceived, addDatabaseLog);
-  Hooks.timerCountdown(timerActive, setTime);
-  Hooks.updateRoundCount(time, currentRound, modeReceived, setCurrentRound, getNextMode, dispatch);
-  Hooks.updateMode(time, modeReceived, currentRound, getNextMode, dispatch);
+  Hooks.usePageTitleUpdate(time, modeReceived);
+  Hooks.useTimeSync(timeSeconds, timerActive, modeReceived, toggle,
+      resetTimer, setToggle, setTime, logPomoSession);
+  Hooks.useIndexedDbLogger(time, modeReceived, logPomoSession);
+  Hooks.useTimerCountdown(timerActive, setTime);
+  Hooks.useRoundCountUpdate(time, currentRound, modeReceived, setCurrentRound, getNextMode, dispatch);
+  Hooks.useModeUpdate(time, modeReceived, currentRound, getNextMode, dispatch);
+  Hooks.useDefaultSettings(isResetting, resetTimer, setIsResetting);
 
   /**
    * Adds logging for current pomo block, tracking pomo type, startTime, endTime, and totalDuration.
    * Once logged, updates the currentTime to null
    * @param {string} modeType
    */
-  function addDatabaseLog(modeType) {
+  function logPomoSession(modeType) {
     console.log('Now logging...');
     const currentEndTime = new Date().toISOString();
-    db.pomodoroLogs.add({
-      mode: modeType,
-      startTime: currentStartTime,
-      endTime: currentEndTime,
-      totalDuration: (new Date(currentEndTime) - new Date(currentStartTime)) / MILLISECONDS_PER_MINUTE,
-    }).catch((error) => {
-      console.error('Failed to log this stint :( Error: ' + error);
-    });
+    addToDatabase(modeType, currentStartTime, currentEndTime);
     setCurrentStartTime(null);
   }
 
@@ -64,21 +64,13 @@ export function Timer({ timeReceived, modeReceived }) {
     return MODES[LONGBREAK]?.name;
   }
 
-  // necessary to use this useEffect and state because dispatched actions are only avail on the next render
-  useEffect(() => {
-    if (isResetting) {
-      reset();
-      setIsResetting(false);
-    }
-  }, [isResetting]);
-
   /**
   * Resets time back to last set time
   * Note to self - send in timeSeconds in most cases
   */
-  function reset() {
+  function resetTimer() {
     setTime(timeSeconds);
-    setTimerActive(false);
+    dispatch(updateTimerActive(false));
     setButtonState(TIMERCONTROLS.start);
   }
 
@@ -90,12 +82,12 @@ export function Timer({ timeReceived, modeReceived }) {
     switch (state) {
       case TIMERCONTROLS.start:
         setCurrentStartTime(new Date().toISOString());
-        setTimerActive(true);
+        dispatch(updateTimerActive(true));
         setButtonState(TIMERCONTROLS.pause);
         break;
       case TIMERCONTROLS.pause:
-        addDatabaseLog(modeReceived);
-        setTimerActive(false);
+        logPomoSession(modeReceived);
+        dispatch(updateTimerActive(false));
         setButtonState(TIMERCONTROLS.start);
         break;
       default:
@@ -163,7 +155,7 @@ export function Timer({ timeReceived, modeReceived }) {
           <TimerControls
             timerActive={timerActive}
             buttonState={buttonState}
-            onReset={reset}
+            onReset={resetTimer}
             onTimerControl={timerControl}
             onResetSettings={resetSettings}
             onModifyActiveTimer={modifyActiveTimer}
@@ -178,11 +170,6 @@ export function Timer({ timeReceived, modeReceived }) {
             onToggle={updateToggleState}
             updateTime={updateTime}
           />
-          <p>
-            {(() => {
-              console.log(`timeReceived ${timeReceived}`);
-            })()}
-          </p>
         </div>
       )}
     </div>
