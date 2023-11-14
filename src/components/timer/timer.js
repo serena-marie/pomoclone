@@ -1,7 +1,6 @@
 import '../../styles/pomo.scss';
 import { useState } from 'react';
-import { TIMERCONTROLS } from '../../consts/timerControls';
-import { MODES, POMODORO, LONGBREAK, SHORTBREAK } from '../../consts/modes';
+import { MODES, POMODORO, LONGBREAK, SHORTBREAK, TIMERCONTROLS } from '../../consts';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateTimeSettings, resetUserSettings, updateTimerActive } from '../../store/modeSlice';
 import { addToDatabase } from '../../database/db';
