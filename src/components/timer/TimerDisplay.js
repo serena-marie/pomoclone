@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import formatTime from '../../utils/formatTime';
+import { formatTime } from '../../utils/formattingHelpers';
 
 /**
  * Displays the formatted time remaining.
