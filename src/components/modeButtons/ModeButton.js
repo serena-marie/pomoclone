@@ -10,14 +10,20 @@ import { modeType } from '../types';
    */
 function ModeButton({ mode, children }) {
   const modeRedux = useSelector((state) => state.mode.currentMode);
+  const isTimerActive = useSelector((state) => state.mode.timerActive);
   const dispatch = useDispatch();
+
   return (
-    <button
-      className= {`modeButton ${mode.name === modeRedux ? 'active': ''}`}
-      onClick={() => dispatch(changeCurrentMode(mode.name))}
-    >
-      {children}
-    </button>
+    <>
+      {
+        isTimerActive ?
+        <button className= {`modeButton ${mode.name === modeRedux ? 'activeMode': ''} disabled`}>
+          { children }
+        </button> :
+        <button className= {`modeButton ${mode.name === modeRedux ? 'activeMode': ''}`}
+          onClick={() => dispatch(changeCurrentMode(mode.name))}>{children}</button>
+      }
+    </>
   );
 }
 

@@ -1,15 +1,10 @@
-@import './variables.scss';
+@import './variables';
 
-.App {
+.app {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App {
+.appBody {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -20,11 +15,13 @@
   transition: background-color 0.5s ease-in-out 0s;
 }
 .pomodoro {
-  background-color: $pomo-background;
+  background-color: $pomoBackground;
 }
+
 .shortBreak {
-  background-color: $shortBreak-background;
+  background-color: $shortBreakBackground;
 }
+
 .longBreak {
-  background-color: $longBreak-background;
+  background-color: $longBreakBackground;
 }

@@ -1,74 +1,54 @@
-/* eslint-disable no-unused-vars */
 import '../../styles/pomo.scss';
-import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
-import { TIMERCONTROLS } from '../../consts/timerControls';
-import { MODES, POMODORO, LONGBREAK, SHORTBREAK } from '../../consts/modes';
+import { useState } from 'react';
+import { MODES, POMODORO, LONGBREAK, SHORTBREAK, TIMERCONTROLS } from '../../consts';
 import { useSelector, useDispatch } from 'react-redux';
-import { changeCurrentMode, updateCurrentRound, updateTimeSettings, resetUserSettings } from '../../store/modeSlice';
-import { updateTitle } from '../../utils/updateTitle';
+import { updateTimeSettings, resetUserSettings, updateTimerActive } from '../../store/modeSlice';
+import { addToDatabase } from '../../database/db';
+import PropTypes from 'prop-types';
 import TimerDisplay from './TimerDisplay';
-import formatTime from '../../utils/formatTime';
 import TimerControls from './TimerControls';
 import TimerSettingsEditor from './TimerSettings';
-// eslint-disable-next-line require-jsdoc
+import * as Hooks from './hooks';
+
+/**
+ * Displays Timer and handles timer functions
+ * @param {number} timeReceived the time received, in minutes
+ * @param {string} modeReceived the current timer mode ["pomodoro", "shortBreak", "longBreak"]
+ * @return {JSX.Element}
+ */
 export function Timer({ timeReceived, modeReceived }) {
   const timeSeconds = timeReceived * 60;
-  const [timerActive, setTimerActive] = useState(false);
   const [time, setTime] = useState(timeSeconds);
   const [buttonState, setButtonState] = useState('START');
   const [toggle, setToggle] = useState(true);
   const [currentRound, setCurrentRound] = useState(1);
-  const maxRounds = useSelector((state) => state.mode.rounds);
   const [isResetting, setIsResetting] = useState(false);
+  const [currentStartTime, setCurrentStartTime] = useState(null);
+  const maxRounds = useSelector((state) => state.mode.rounds);
+  const timerActive = useSelector((state) => state.mode.timerActive);
+
   const dispatch = useDispatch();
 
-  // update page title
-  useEffect(() => {
-    updateTitle(formatTime(time), modeReceived);
-  }, [time]);
+  // CUSTOM HOOKS; see timer/hooks.js
+  Hooks.usePageTitleUpdate(time, modeReceived);
+  Hooks.useTimeSync(timeSeconds, timerActive, modeReceived, toggle,
+      resetTimer, setToggle, setTime, logPomoSession);
+  Hooks.useIndexedDbLogger(time, modeReceived, logPomoSession);
+  Hooks.useTimerCountdown(timerActive, setTime);
+  Hooks.useRoundCountUpdate(time, currentRound, modeReceived, setCurrentRound, getNextMode, dispatch);
+  Hooks.useModeUpdate(time, modeReceived, currentRound, getNextMode, dispatch);
+  Hooks.useDefaultSettings(isResetting, resetTimer, setIsResetting);
 
-  // Updates time when mode changes
-  useEffect(() => {
-    if (time !== timeSeconds && timerActive) reset();
-    else {
-      setTime(timeSeconds);
-      // if trying to edit time when switching modes, toggle off.
-      if (!toggle) setToggle(true);
-    }
-  }, [modeReceived]);
-
-  useEffect(() => {
-    // https://developer.mozilla.org/en-US/docs/Web/API/setInterval
-    // https://stackoverflow.com/questions/39426083/update-react-component-every-second
-    let timeInterval = null;
-    if (timerActive) {
-      timeInterval = setInterval(() => {
-        setTime((prevTime) => {
-          return prevTime > 0 ? prevTime - 1 : 0;
-        });
-      }, 1000);
-    }
-    return () => {
-      clearInterval(timeInterval);
-    };
-  }, [timerActive]);
-
-  useEffect(() => {
-    const nextMode = getNextMode(modeReceived, currentRound);
-    if (nextMode === MODES.POMODORO && time === 0) {
-      const updatedRound = currentRound + 1;
-      dispatch(updateCurrentRound(updatedRound));
-      setCurrentRound(updatedRound);
-    }
-  }, [time]);
-
-  useEffect(() => {
-    if (time === 0) {
-      const nextMode = getNextMode(modeReceived, currentRound);
-      dispatch(changeCurrentMode(nextMode));
-    }
-  }, [time]);
+  /**
+   * Adds logging for current pomo block, tracking pomo type, startTime, endTime, and totalDuration.
+   * Once logged, updates the currentTime to null
+   * @param {string} modeType
+   */
+  function logPomoSession(modeType) {
+    const currentEndTime = new Date().toISOString();
+    addToDatabase(modeType, currentStartTime, currentEndTime);
+    setCurrentStartTime(null);
+  }
 
   /**
    * Gets the upcoming mode based on the current mode and pomodoro round number.
@@ -82,36 +62,32 @@ export function Timer({ timeReceived, modeReceived }) {
     return MODES[LONGBREAK]?.name;
   }
 
-  // necessary to use this useEffect and state because dispatched actions are only avail on the next render
-  useEffect(() => {
-    if (isResetting) {
-      reset();
-      setIsResetting(false);
-    }
-  }, [isResetting]);
-
   /**
   * Resets time back to last set time
   * Note to self - send in timeSeconds in most cases
   */
-  function reset() {
+  function resetTimer() {
     setTime(timeSeconds);
-    setTimerActive(false);
+    dispatch(updateTimerActive(false));
     setButtonState(TIMERCONTROLS.start);
   }
 
   /**
-   * Controls timer
-   * @param {String} state
+   * Controls timer's behavior based on provided state.
+   * When the state is start: initiates timer's start time, activates the timer, and updates button's state
+   * When the state is pause: logs the current pomodoro session, stops the timer, and updates button's state
+   * @param {string} state The timer's current state
    */
   function timerControl(state) {
     switch (state) {
       case TIMERCONTROLS.start:
-        setTimerActive(true);
+        setCurrentStartTime(new Date().toISOString());
+        dispatch(updateTimerActive(true));
         setButtonState(TIMERCONTROLS.pause);
         break;
       case TIMERCONTROLS.pause:
-        setTimerActive(false);
+        logPomoSession(modeReceived);
+        dispatch(updateTimerActive(false));
         setButtonState(TIMERCONTROLS.start);
         break;
       default:
@@ -172,27 +148,30 @@ export function Timer({ timeReceived, modeReceived }) {
   };
 
   return (
-    <div>
-      <div className='timerStringContainer'>
-        {
-          toggle ? (
-            <div>
-              <TimerDisplay time={time} onDoubleClick={toggleTimeEdit}/>
-              <TimerControls timerActive={timerActive} buttonState={buttonState} onReset={reset}
-                onTimerControl={timerControl} onResetSettings={resetSettings}
-                onModifyActiveTimer={modifyActiveTimer}/>
-            </div>
-          ) : (
-            <div>
-              <TimerSettingsEditor timeReceived={timeReceived} modeReceived={modeReceived}
-                onTimeSettingsChange={updateTimeSettings} onToggle={updateToggleState} updateTime={updateTime}/>
-              <p>{(() => {
-                console.log(`timeReceived ${timeReceived}`);
-              })()}</p>
-            </div>
-          )
-        }
-      </div>
+    <div className="timerStringContainer">
+      {toggle ? (
+        <div className="timerControlsContainer">
+          <TimerDisplay time={time} onDoubleClick={toggleTimeEdit} />
+          <TimerControls
+            timerActive={timerActive}
+            buttonState={buttonState}
+            onReset={resetTimer}
+            onTimerControl={timerControl}
+            onResetSettings={resetSettings}
+            onModifyActiveTimer={modifyActiveTimer}
+          />
+        </div>
+      ) : (
+        <div className="timerSettingsEditorContainer">
+          <TimerSettingsEditor
+            timeReceived={timeReceived}
+            modeReceived={modeReceived}
+            onTimeSettingsChange={updateTimeSettings}
+            onToggle={updateToggleState}
+            updateTime={updateTime}
+          />
+        </div>
+      )}
     </div>
   );
 }

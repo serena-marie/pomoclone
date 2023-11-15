@@ -1,3 +1,5 @@
+import modeHelper from './modeHelper';
+
 /**
   * Formats time to be displayed
   * @param {number} time Time in seconds
@@ -12,4 +14,15 @@ function formatTime(time) {
   return `${minute}:${second}`;
 }
 
-export default formatTime;
+/**
+ * Formats title and message for tab displays as `Time - Message`
+ * @param {String} time Formatted time
+ * @param {String} mode Name of the current mode
+ * @return {String} Formatted document title
+ */
+function formatTitle(time, mode) {
+  const message = modeHelper(mode)?.message;
+  return `${time} - ${message}`;
+}
+
+export { formatTime, formatTitle };
