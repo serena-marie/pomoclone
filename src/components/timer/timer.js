@@ -45,7 +45,6 @@ export function Timer({ timeReceived, modeReceived }) {
    * @param {string} modeType
    */
   function logPomoSession(modeType) {
-    console.log('Now logging...');
     const currentEndTime = new Date().toISOString();
     addToDatabase(modeType, currentStartTime, currentEndTime);
     setCurrentStartTime(null);
@@ -74,8 +73,10 @@ export function Timer({ timeReceived, modeReceived }) {
   }
 
   /**
-   * Controls timer
-   * @param {String} state
+   * Controls timer's behavior based on provided state.
+   * When the state is start: initiates timer's start time, activates the timer, and updates button's state
+   * When the state is pause: logs the current pomodoro session, stops the timer, and updates button's state
+   * @param {string} state The timer's current state
    */
   function timerControl(state) {
     switch (state) {
