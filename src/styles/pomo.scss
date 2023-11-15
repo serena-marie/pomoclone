@@ -1,22 +1,26 @@
-@import './variables.scss';
+@import './variables';
+
 .timerContainer {
-    background-color: rgb(255,255,255,0.1);
+    background-color: rgb(255 255 255 / 10%);
     border-radius: 10px;
     padding: 0.75em 2em;
 }
+
 .timerStringContainer {
     .warning {
         font-size: 12px;
         font-style: italic;
         font-weight: lighter;
-    }    
+    }
+        
     p { 
         font-size: 120px;
-        margin: 0px;
+        margin: 0;
         font-weight: bold;
         font-family: Arial, Helvetica, sans-serif
     }
 }
+
 .timerControls {
     .controls {
         border: none;
@@ -24,9 +28,9 @@
         font-size: 22px;
         height: 55px;
         background-color: white;
-        color:  $pomo-background;
-        margin: 20px 0px 10px;
-        padding: 0px 12px;
+        color:  $pomoBackground;
+        margin: 20px 0 10px;
+        padding: 0 12px;
         width: 200px
     }
 
@@ -37,10 +41,12 @@
         opacity: 0.9;
     }
 }
+
 .timerManipulate {
     display: flex;
     gap: 1rem;
 }
+
 .modeButton {
     background: none;
     border: none;
@@ -48,7 +54,7 @@
     margin: 10px;
 
     &.activeMode {
-        background-color: rgba(0, 0, 0, 0.15);
+        background-color: rgb(0 0 0 / 15%);
         border-radius: 4px;
         padding: 2px 12px;
     }
@@ -58,12 +64,14 @@
         cursor: not-allowed;
     }
 }
+
 .pomoCount {
     display: inline-block;
     font-size: 16px;
     opacity: 0.6;
     margin-bottom: 4px;
 }
+
 .pomoMessage {
     font-size: 18px;
     font-weight: 100;
