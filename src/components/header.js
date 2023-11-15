@@ -20,11 +20,12 @@ export function Header() {
         <FontAwesomeIcon icon={faClock} style={{color: '#ffffff'}} /> Pomoclone
       </div>
       <div className='headerRight'>
-        <button onClick={handleStatsClick}> <FontAwesomeIcon icon={faChartColumn} style={{color: '#ffffff'}} />
-          Stats
-        </button>
-        <button> <FontAwesomeIcon icon={faGear} style={{color: '#ffffff'}} /> Settings </button>
-        <button> <FontAwesomeIcon icon={faUser} style={{color: '#ffffff'}} /> Login </button>
+        <button onClick={handleStatsClick}>
+          <FontAwesomeIcon icon={faChartColumn} style={{color: '#ffffff'}} /> Stats </button>
+        <button>
+          <FontAwesomeIcon icon={faGear} style={{color: '#ffffff'}} /> Settings </button>
+        <button>
+          <FontAwesomeIcon icon={faUser} style={{color: '#ffffff'}} /> Login </button>
       </div>
     </div>
   );

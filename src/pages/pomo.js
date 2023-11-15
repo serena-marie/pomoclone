@@ -11,7 +11,6 @@ export default function Pomo() {
   const modeRedux = useSelector((state) => state.mode.currentMode);
   const timeRedux = useSelector((state) => state.mode.currentTime);
 
-  // eslint-disable-next-line no-unused-vars
   const { isModalOpen, setIsModalOpen } = useModalContext();
 
   return (
