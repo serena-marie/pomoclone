@@ -20,10 +20,10 @@ const router = createBrowserRouter([
 function App() {
   const modeRedux = useSelector((state) => state.mode.currentMode);
   return (
-    <div className="App">
-      <header className={`App-header ${modeRedux}`}>
+    <div className="app">
+      <div className={`appBody ${modeRedux}`}>
         <RouterProvider router = {router} />
-      </header>
+      </div>
     </div>
   );
 }
