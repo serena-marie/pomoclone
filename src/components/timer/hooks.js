@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { formatTitle, formatTime } from '../../utils/formattingHelpers';
-import { MILLISECONDS_PER_SECOND } from '../../consts/timeMaths';
-import { POMODORO } from '../../consts/modes';
+import { MILLISECONDS_PER_SECOND, POMODORO } from '../../consts';
 import { changeCurrentMode, updateCurrentRound } from '../../store/modeSlice';
 
 
